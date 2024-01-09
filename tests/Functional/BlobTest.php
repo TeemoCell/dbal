@@ -7,6 +7,7 @@ use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Tests\FunctionalTestCase;
 use Doctrine\DBAL\Tests\TestUtil;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\Types;
 
 use function fopen;
 use function str_repeat;
@@ -23,9 +24,9 @@ class BlobTest extends FunctionalTestCase
         }
 
         $table = new Table('blob_table');
-        $table->addColumn('id', 'integer');
-        $table->addColumn('clobcolumn', 'text', ['notnull' => false]);
-        $table->addColumn('blobcolumn', 'blob', ['notnull' => false]);
+        $table->addColumn('id', Types::INTEGER);
+        $table->addColumn('clobcolumn', Types::TEXT, ['notnull' => false]);
+        $table->addColumn('blobcolumn', Types::BLOB, ['notnull' => false]);
         $table->setPrimaryKey(['id']);
 
         $this->dropAndCreateTable($table);
@@ -169,11 +170,42 @@ class BlobTest extends FunctionalTestCase
         $this->assertBlobContains('test');
     }
 
+    public function testBlobBindingDoesNotOverwritePrevious(): void
+    {
+        $table = new Table('blob_table');
+        $table->addColumn('id', 'integer');
+        $table->addColumn('blobcolumn1', 'blob', ['notnull' => false]);
+        $table->addColumn('blobcolumn2', 'blob', ['notnull' => false]);
+        $table->setPrimaryKey(['id']);
+        $this->dropAndCreateTable($table);
+
+        $params = ['test1', 'test2'];
+        $this->connection->executeStatement(
+            'INSERT INTO blob_table(id, blobcolumn1, blobcolumn2) VALUES (1, ?, ?)',
+            $params,
+            [ParameterType::LARGE_OBJECT, ParameterType::LARGE_OBJECT],
+        );
+
+        $blobs = $this->connection->fetchNumeric('SELECT blobcolumn1, blobcolumn2 FROM blob_table');
+        self::assertIsArray($blobs);
+
+        $actual = [];
+        foreach ($blobs as $blob) {
+            $blob     = Type::getType('blob')->convertToPHPValue($blob, $this->connection->getDatabasePlatform());
+            $actual[] = stream_get_contents($blob);
+        }
+
+        self::assertEquals(['test1', 'test2'], $actual);
+    }
+
     private function assertBlobContains(string $text): void
     {
         [, $blobValue] = $this->fetchRow();
 
-        $blobValue = Type::getType('blob')->convertToPHPValue($blobValue, $this->connection->getDatabasePlatform());
+        $blobValue = Type::getType(Types::BLOB)->convertToPHPValue(
+            $blobValue,
+            $this->connection->getDatabasePlatform(),
+        );
 
         self::assertIsResource($blobValue);
         self::assertEquals($text, stream_get_contents($blobValue));

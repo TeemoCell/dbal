@@ -260,9 +260,9 @@ if (! $diff->isEmpty()) {
 }
 ```
 
-## Deprecated not passing `$fromColumn` to the `TableDiff` constructor.
+## Deprecated not passing `$fromTable` to the `TableDiff` constructor.
 
-Not passing `$fromColumn` to the `TableDiff` constructor has been deprecated.
+Not passing `$fromTable` to the `TableDiff` constructor has been deprecated.
 
 The `TableDiff::$name` property and the `TableDiff::getName()` method have been deprecated as well. In order to obtain
 the name of the table that the diff describes, use `TableDiff::getOldTable()`.
@@ -679,10 +679,12 @@ This method is unused by the DBAL since 2.0.
 
 ## Deprecated `Type::getName()`
 
-This will method is not useful for the DBAL anymore, and will be removed in 4.0.
+This method is not useful for the DBAL anymore, and will be removed in 4.0.
 As a consequence, depending on the name of a type being `json` for `jsonb` to
 be used for the Postgres platform is deprecated in favor of extending
 `Doctrine\DBAL\Types\JsonType`.
+
+You can use `Type::getTypeRegistry()->lookupName($type)` instead.
 
 ## Deprecated `AbstractPlatform::getColumnComment()`, `AbstractPlatform::getDoctrineTypeComment()`,
 `AbstractPlatform::hasNative*Type()` and `Type::requiresSQLCommentHint()`
@@ -1002,7 +1004,7 @@ deprecated in order to provide a more consistent API.
 
 ## Deprecated `Comparator::compare($fromSchema, $toSchema)`
 
-The usage of `Comparator::compare($fromSchema, $toSchema)` is deprecated and 
+The usage of `Comparator::compare($fromSchema, $toSchema)` is deprecated and
 replaced by `Comparator::compareSchemas($fromSchema, $toSchema)` in order to
 clarify the purpose of the method.
 
@@ -1327,7 +1329,7 @@ Additional related changes:
 
 1. The `FetchMode` class and the `setFetchMode()` method of the `Connection` and `Statement` interfaces are removed.
 2. The `Statement::fetch()` method is replaced with `fetchNumeric()`, `fetchAssociative()` and `fetchOne()`.
-3. The `Statement::fetchAll()` method is replaced with `fetchAllNumeric()`, `fetchAllAssociative()` and `fechColumn()`.
+3. The `Statement::fetchAll()` method is replaced with `fetchAllNumeric()`, `fetchAllAssociative()` and `fetchColumn()`.
 4. The `Statement::fetchColumn()` method is replaced with `fetchOne()`.
 5. The `Connection::fetchArray()` and `fetchAssoc()` methods are replaced with `fetchNumeric()` and `fetchAssociative()` respectively.
 6. The `StatementIterator` class is removed. The usage of a `Statement` object as `Traversable` is no longer possible. Use `iterateNumeric()`, `iterateAssociative()` and `iterateColumn()` instead.
@@ -1391,7 +1393,7 @@ All implementations of the `VersionAwarePlatformDriver` interface have to implem
 ## BC BREAK: Removed `MsSQLKeywords` class
 
 The `Doctrine\DBAL\Platforms\MsSQLKeywords` class has been removed.
-Please use `Doctrine\DBAL\Platforms\SQLServerPlatform `instead.
+Please use `Doctrine\DBAL\Platforms\SQLServerPlatform` instead.
 
 ## BC BREAK: Removed PDO DB2 driver
 

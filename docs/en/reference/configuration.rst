@@ -134,6 +134,20 @@ name.
 
     $conn = DriverManager::getConnection($connectionParams);
 
+You can also use the mapping table to map a DSN's scheme to a custom driver
+class:
+
+.. code-block:: php
+
+    <?php
+    use Doctrine\DBAL\Tools\DsnParser;
+    use App\DBAL\CustomDriver; // implements Doctrine\DBAL\Driver
+
+    //..
+    $dsnParser = new DsnParser(['custom' => CustomDriver::class]);
+    $connectionParams = $dsnParser
+        ->parse('custom://user:secret@localhost/mydb');
+
 Driver
 ~~~~~~
 
@@ -316,6 +330,7 @@ pdo_sqlsrv / sqlsrv
 -  ``host`` (string): Hostname of the database to connect to.
 -  ``port`` (integer): Port of the database to connect to.
 -  ``dbname`` (string): Name of the database/schema to connect to.
+-  ``driverOptions`` (array): Any supported options found on `https://learn.microsoft.com/en-us/sql/connect/php/connection-options`
 
 ibm_db2
 ^^^^^^^
